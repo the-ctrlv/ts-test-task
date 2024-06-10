@@ -7,7 +7,7 @@ function App() {
 
   return (
     <Provider store={store}>
-      <div className="App">
+      <div className="content-wrapper">
         <Form />
       </div>
     </Provider>

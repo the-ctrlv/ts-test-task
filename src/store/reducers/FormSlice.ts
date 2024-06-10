@@ -1,6 +1,10 @@
 /* eslint-disable no-param-reassign */
 import { createSlice } from "@reduxjs/toolkit";
-import { IFormState } from "../../types/Form";
+
+interface IFormState {
+  option?: string;
+  note?: string;
+}
 
 const initialState: IFormState = {
   option: "",

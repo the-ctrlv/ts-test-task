@@ -1,8 +1,11 @@
 import { Controller, useForm } from "react-hook-form";
-import { formSlice } from "../../store/reducers/FormSlice";
+
 import RadioInput from "../RadioInput";
 import TextInput from "../TextInput";
 import Button from "../Button";
+
+import { formSlice } from "../../store/reducers/FormSlice";
+
 import { useAppDispatch } from "../../hooks/store";
 
 interface IFormValues {
@@ -27,6 +30,7 @@ export default function Form() {
     setValue,
     handleSubmit,
     formState: { errors },
+    clearErrors,
   } = useForm({
     mode: "onChange",
     defaultValues: initialFormData,
@@ -50,15 +54,22 @@ export default function Form() {
   const { dataUpdate } = formSlice.actions;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="flex flex-col gap-8 my-10"
+    >
+      <h1 className="font-bold text-5xl text-center">Test Form</h1>
       <label className="col-span-2">
-        <span>Choose some option</span>
-        <div className="radio-container">
+        <span className="font-semibold text-lg block mb-2">
+          Choose some option
+        </span>
+        <div className="radio-container relative">
           {["Option A", "Option B", "Option C"].map((item) => (
             <Controller
               key={item}
               name="option"
               control={control}
+              rules={{ required: "This field is required" }}
               render={({ field: { onChange } }) => (
                 <RadioInput
                   isInvalid={!!errors.option}
@@ -79,6 +90,9 @@ export default function Form() {
               )}
             />
           ))}
+          {errors.option && (
+            <span className="error-msg">{errors.option.message}</span>
+          )}
         </div>
       </label>
 
@@ -87,9 +101,7 @@ export default function Form() {
           name="text"
           control={control}
           rules={{
-            required: "This field is required",
             validate: (e) => {
-              // Include basic validation to check if the entered text follows a simple pattern (e.g., "DISCOUNT2024").
               const text = e as string;
               if (text && !/^DISCOUNT[0-9]{4}$/i.test(text)) {
                 return "Text must match the pattern DISCOUNT####";
@@ -104,14 +116,44 @@ export default function Form() {
             />
           )}
         />
-        {errors.text && <span>{errors.text.message}</span>}
+        {errors.text && (
+          <span className="error-msg">{errors.text.message}</span>
+        )}
       </label>
+      <div className="flex-col flex md:flex-row gap-5 items-start md:items-center mb-4 md:mb-0 relative">
+        <Button
+          type="button"
+          onClick={() => {
+            generateDiscountCode();
+            clearErrors("text");
+            setValue("text", "");
+          }}
+        >
+          Generate Discount Code
+        </Button>
+
+        {currentValues.generatedCode && (
+          <h4 className="absolute md:relative -bottom-7 md:bottom-auto">
+            New Generated Code:
+            <span className="text-green font-bold inline-block ms-3">
+              {currentValues.generatedCode}
+            </span>
+          </h4>
+        )}
+      </div>
 
       <Controller
         name="notes"
         control={control}
         render={({ field: { onChange } }) => (
           <textarea
+            className="hover:ring-dark-gray py-3 placeholder:text-md
+            md:max-w-xs bg-white block h-[150px] w-full
+             appearance-none text-lg
+              md:placeholder:text-base rounded-lg px-5 font-semibold leading-6
+              text-black outline-0 ring-2 focus:outline-none
+               focus:ring-2 focus:ring-green ring-borderGray resize-none"
+            rows={5}
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
               onChange(e);
               dispatch(
@@ -125,15 +167,8 @@ export default function Form() {
           />
         )}
       />
-      <Button type="button" onClick={generateDiscountCode}>
-        Generate Discount Code
-      </Button>
 
-      {currentValues.generatedCode && (
-        <h4>Generated Code: {currentValues.generatedCode}</h4>
-      )}
-
-      <Button type="submit">Submit</Button>
+      <Button type="submit">SUBMIT</Button>
     </form>
   );
 }
